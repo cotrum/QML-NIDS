@@ -1,5 +1,7 @@
 cse-cic-ids2018/
 .venv/
 .ipynb_checkpoints/
+service.ipynb
+
 .DS_Store
 Thumbs.db
