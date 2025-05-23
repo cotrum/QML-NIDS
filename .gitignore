@@ -1,0 +1,5 @@
+cse-cic-ids2018/
+.venv/
+.ipynb_checkpoints/
+.DS_Store
+Thumbs.db
