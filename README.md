@@ -12,6 +12,10 @@ My main goal is obtaining meaningful TDA data (either classically, which I am wo
 #### A quick note for the NOTES:  
 The floating files "Introductory_notebook...", "top_spectra-real.." and "quantum_persistent..." are variations on the "Quantum_Topological_Data_Analysis-NEW" work and may have some meaningful data. The main reason I abandoned it for the time being was that it was not producing accurate results (when tested on a small example, it was not returning a value close to the expected value).  
 ALSO! I generated a X.npy file that I use in Betti_nbrAnomaly_curves.ipynb but unfortunately could not commit it as GitHub said it was too large.
+  
+### Links to some rough Google doc notes:
+https://docs.google.com/document/d/1DwOZEnhLEr4viyFgxQHR1NVcfRnFgTtyFzIgwQr1Fvs/edit?usp=sharing
+https://docs.google.com/document/d/1bnjIIWfmdA_dBot2yzQt9WdcGe1rKTsWnscUFlz-4D4/edit?usp=sharing 
 
 ## File Structure:
 to be updated
