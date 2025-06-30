@@ -3,7 +3,7 @@ import gudhi
 from sklearn.preprocessing import StandardScaler
 
 # Load your .npy data file
-data = np.load("100-botnet-attack.npy")  # Replace with actual filename
+data = np.load("100-botnet-attack.npy")  
 # normalize data
 scaler = StandardScaler()
 data_scaled = scaler.fit_transform(data)
