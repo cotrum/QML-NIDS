@@ -1,6 +1,8 @@
 cse-cic-ids2018/
 BCCC-CIC-CSE-IDS2018
-.venv/
+
+.venv
+
 .ipynb_checkpoints/
 service.ipynb
 edge_data
@@ -21,3 +23,4 @@ KERNELdatasets
 Quantum_Topological_Data_Analysis-NEW
 Notes & Collected Results
 400ATTACKDATA
+updated-quask
