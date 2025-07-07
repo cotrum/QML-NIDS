@@ -1,17 +1,19 @@
 # Quantum Network Intrusion Detection Using Topological Data Analysis
 Repo containing all material for Mary Cotrupi and Brian Callahan's Summer 2025 research (RPI)
 
-## NOTES:
-I have lots of files of me testing different methods and pipelies and going down different routes (mostly found in the "scrap" folder). The main approach I decided to focus on is in "QKERNEL.ipynb", a QuASK-based QML kernel implementation. Using this, I can give the model a "benign" dataset with selected features and an "attack" dataset, which it then breaks up into traning and testing sets and applies quantum logic via the quask kernel implementation (slightly modified for syntax changes & Quantum One backend).  
-Thus, the overall idea is that we can build a quantum-enhanced model (quantum kernels may be more efficient than their classical counterparts for big data) that can be trained on existing network intrusion data, and, once sufficiently trained, we/companies/businesses/IT sectors can employ the model to detect sophisticated attacks in networks. 
+## Overview (as of 7/7):
+The route I decided to stick with:  
+Using quantum kernels to train machine learning models to classify a variety of realistic intrusion detection attacks. The final code can be found and run from KERNELATTACK.ipynb. I sorted the raw network attack data, combined the benign and attack data, selected points to simulate capturing a network flow segment, and created my model based on ideally 50:50 benign:attack data.  
+
+### Experimentation:  
+Experimented a bit with kernel optimization in optimQKern.ipynb.. ran into some errors but see it as an area worthwhile of further research, as the hopes would be to train on larger datasets (currently limited by exponential kernel growth and real quantum hardware capabilities).  
+Also tested a bit on changing up which features to use for training; original dataset had 250+, which I reduced to 8. Smaller tests revealed a notable slowdown using the Aer simulator when adding more features, while hardware showed no change. Potential quantum advantage here worth looking into more.  
+Most significant experimentation contributing to my results involved adjusting the bandwidth when specifiying the kernel's Ansatz. More info on QuAsk's page. Found that accuracy varied intensely based on bandwidth, and attacks preferred differing levels. Did some smaller sample testing with adjusting the bandwidths, then grouped the attacks and evaluated them separately to achieve the highest accuracy per attack. Significant increase in accuracy, though runtime also seemed to increase. 
   
-### The next steps (as of 6/19):  
-I am working on constructing Betti curves (as a part of Topological Data Analysis) for anomalous points and neighboring data and incorporating these as additional features into the training sets for the quantum kernel implemenetation (QKERNEL). My current classical TDA work can be found in the notebook "Betti_nbrAnomaly_curves.ipynb", though I have several different implementations that I tested (but did not see a lot of potential for) in the "CLASSICAL_PH" folder.   
-My main goal is obtaining meaningful TDA data (either classically, which I am working on now, or with quantum, which I got a minimal/prototype working model for in the "Quantum_Topological_Data_Analysis-NEW" folder), and, once I incorporate that into the training sets for my kernel, having the model's detection accuracy go up.  
-    
-#### A quick note for the NOTES:  
-The floating files "Introductory_notebook...", "top_spectra-real.." and "quantum_persistent..." are variations on the "Quantum_Topological_Data_Analysis-NEW" work and may have some meaningful data. The main reason I abandoned it for the time being was that it was not producing accurate results (when tested on a small example, it was not returning a value close to the expected value).  
-ALSO! I generated a X.npy file that I use in Betti_nbrAnomaly_curves.ipynb but unfortunately could not commit it as GitHub said it was too large.
+### The main takeaway/potential story to build:   
+Began research with the intent to create a quantum topological data analysis (TDA) model for network intrusion detection, seeing that there may be quantum advantage in that it can compute Betti numbers for higher dimensions while classical computers are restricted to 2 dimensions. Got a small working QTDA model, however, upon testing it for 4 points with a simple classification problem, noiseless simulator succeeded, but real quantum hardware was not close at all, likely due to noise and high circuit depth. Pivoted and discovered quantum kernels that generate many more circuits, but of much lower depth. Minimal research had been done on using these kernels for intrusion detection and cybersecurity, and there was extremely limited research on actually testing on real hardware. Thus I built upon the open-source QuAsk module, modified it to group the jobs in Sessions for improved scaling for larger datasets, and tested it on all attacks. While results did not exactly match those of the noiseless simulator, they were very close with a low mean deviation. In other words, results using the real hardware on the kernels were MUCH more accurate compared to the QTDA model. Opens up a whole new door of REALISTICALLY using quantum computing for network intrusion detection in cybersecurity.  
+
+
   
 ### Links to some rough Google doc notes:
 https://docs.google.com/document/d/1DwOZEnhLEr4viyFgxQHR1NVcfRnFgTtyFzIgwQr1Fvs/edit?usp=sharing
