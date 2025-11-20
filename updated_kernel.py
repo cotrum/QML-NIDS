@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.spatial.distance import cdist
 from abc import ABC, abstractmethod
 from . import Ansatz, KernelType, KernelFactory
 from qiskit_ibm_runtime import Session, SamplerV2 as Sampler
@@ -95,12 +96,13 @@ class Kernel(ABC):
             Phi1 = np.array([self.phi(x) for x in X1]).reshape((n, 1))
             Phi2 = np.array([self.phi(x) for x in X2]).reshape((m, 1))
             return Phi1.dot(Phi2.T)
-
+        
+    
     def kernel_train_matrix(self, X1, X2):
-        N = X1.shape[0]
-        kernel_matrix = np.full((N, N), np.nan)
-
         if self.platform == "infty_shots":
+            N = X1.shape[0]
+            kernel_matrix = np.full((N, N), np.nan)
+            circ_count = 0
             for i in range(kernel_matrix.shape[0]):
                 for j in range(i,kernel_matrix.shape[1]):
                     if i == j:
@@ -108,39 +110,47 @@ class Kernel(ABC):
                     else:
                         kernel_matrix[i,j] = self.kappa(X1[i], X2[j])
                         kernel_matrix[j,i] = kernel_matrix[i,j]
+                        circ_count+=1
+            # print("Number of circuits: ", circ_count)
             return kernel_matrix
         
         else: # self.platform == "ibm_quantum"
+            N = X1.shape[0]
+            kernel_matrix = np.full((N, N), np.nan)
+            # We'll collect (i,j,QuantumCircuit) triples
             entries = []
             circuits = []
-            for i in range(kernel_matrix.shape[0]):
-                for j in range(i,kernel_matrix.shape[1]):
+            for i in range(N):
+                for j in range(i, N):
                     if i == j:
-                        kernel_matrix[i,j] = 1
+                        kernel_matrix[i, j] = 1
                     else:
                         qc = self.kappa(X1[i], X2[j])
                         entries.append((i, j))
                         circuits.append(qc)
             
+            # print("Number of circuits: ", len(circuits))
+            
             if circuits:
+                # Transpile / pass manager
                 pm = generate_preset_pass_manager(
                     backend=self.backend,
-                    optimization_level=self.optimization_level,
-                    initial_layout=self.layout
+                    optimization_level=self.optimization_level
                 )
-                isa_circuits = pm.run(circuits)
-
+                transp_circuits = pm.run(circuits) # transpile the circuits
+                
                 # consolidate jobs into Sessions
                 max_per_job = 150
                 
                 with Session(backend=self.backend) as session:
                     sampler = Sampler(mode=session)
-                    for start in range(0, len(isa_circuits), max_per_job):
+                    for start in range(0, len(transp_circuits), max_per_job):
                         end = start + max_per_job
-                        batch = isa_circuits[start:end]
+                        batch = transp_circuits[start:end]
                         job = sampler.run(batch)
+                        # print(f"Job sent to hardware. Job ID: {job.job_id()}")
                         results = job.result()
-                        
+                        # Process results - essentially a modified get_running_method() from core_implementation/qiskit_kernel.py to work with Sessions
                         for index, res in enumerate(results):
                             global_index = start + index
                             i, j = entries[global_index]
@@ -157,16 +167,20 @@ class Kernel(ABC):
 
 
     def kernel_test_matrix(self, X1, X2):
-        N_tr = X2.shape[0]
-        N_te = X1.shape[0]
-        kernel_matrix = np.full((N_te, N_tr), np.nan)
         if self.platform == "infty_shots":
+            N_tr = X2.shape[0]
+            N_te = X1.shape[0]
+            kernel_matrix = np.full((N_te, N_tr), np.nan)
             for i in range(kernel_matrix.shape[0]):
                 for j in range(kernel_matrix.shape[1]):
                     kernel_matrix[i,j] = self.kappa(X1[i],X2[j])
             return kernel_matrix
         
         else:
+            from qiskit.transpiler import generate_preset_pass_manager
+            N_tr = X2.shape[0]
+            N_te = X1.shape[0]
+            kernel_matrix = np.full((N_te, N_tr), np.nan)
             entries = []
             circuits = []
             for i in range(kernel_matrix.shape[0]):
@@ -174,17 +188,18 @@ class Kernel(ABC):
                     qc = self.kappa(X1[i], X2[j])
                     entries.append((i, j))
                     circuits.append(qc)
-                    
             if circuits:
                 pm = generate_preset_pass_manager(
                     backend=self.backend,
-                    optimization_level=self.optimization_level,
-                    initial_layout=self.layout
+                    optimization_level=self.optimization_level
                 )
                 isa_circuits = pm.run(circuits)
 
                 max_per_job = 150
 
+                from qiskit_ibm_runtime import Session, SamplerV2 as Sampler
+                from qiskit.result import QuasiDistribution
+                # Submit under one Session, in chunks if needed
                 with Session(backend=self.backend) as session:
                     sampler = Sampler(mode=session)
 
@@ -192,8 +207,8 @@ class Kernel(ABC):
                         end = start + max_per_job
                         batch = isa_circuits[start:end]
                         job = sampler.run(batch)
-                        
-                        results = job.result() 
+                        # print(f"Job sent to hardware. Job ID: {job.job_id()}")
+                        results = job.result()  # list of SamplerPubResult
 
                         for idx, res in enumerate(results):
                             global_idx = start + idx

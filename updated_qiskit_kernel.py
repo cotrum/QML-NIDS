@@ -91,6 +91,8 @@ class QiskitKernel(Kernel):
                 default_shots=self.n_shots
                 )
         elif self.platform == "ibm_quantum":
+            if hasattr(self, "_sampler"):
+                return self._sampler
             options = self.get_sampler_options()
             return IBMSampler(mode=self.backend, options=options)
         
@@ -99,12 +101,13 @@ class QiskitKernel(Kernel):
             return StatevectorEstimator
         elif self.platform == "ibm_quantum":
             options = self.get_estimator_options()
-            return IBMEstimator(backend=self.backend, options=options)
+            return IBMEstimator(mode=self.backend, options=options)
 
     def get_running_method(self, qc: QuantumCircuit):
         sampler = self.get_sampler()
         if self.platform == "infty_shots":
             res = Statevector.from_instruction(qc).data[0].real
+            return res
         elif self.platform == "finite_shots":
             qc.measure_all()
             counts = (
@@ -114,11 +117,8 @@ class QiskitKernel(Kernel):
                 {meas: count / self.n_shots for meas, count in counts.items()}, shots=self.n_shots
             )
             res = dist.get(0, 0.0)
-        elif self.platform == "ibm_quantum":
-            qc.measure_all()
-            return qc
-        return res
-    
+            return res
+
     def get_job_results(self, job: RuntimeJobV2):
         counts = job.result()[0].data.meas.get_int_counts()
         dist = QuasiDistribution(
@@ -149,8 +149,15 @@ class QiskitKernel(Kernel):
             qc = QuantumCircuit(self.ansatz.n_qubits, self.ansatz.n_qubits)
             qc.append(self.get_qiskit_ansatz().assign_parameters(x1.tolist()), range(self.ansatz.n_qubits))
             qc.append(self.get_qiskit_ansatz().assign_parameters(x2.tolist()).inverse(), range(self.ansatz.n_qubits))
-            probabilities = self.get_running_method(qc)
-            return probabilities
+            if self.platform == "infty_shots":
+                probabilities = self.get_running_method(qc)
+                # Matplotlib drawing
+                qc.draw(output="mpl")
+                return probabilities
+            
+            else: # running on hardware
+                qc.measure_all()
+                return qc
         
         elif self.type == KernelType.SWAP_TEST:
             qc = QuantumCircuit(1+2*self.ansatz.n_qubits, 1)

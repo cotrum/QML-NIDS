@@ -1,45 +1,19 @@
-cse-cic-ids2018/
-BCCC-CIC-CSE-IDS2018
-.venv/
-.ipynb_checkpoints/
-service.ipynb
+# cse-cic-ids2018/
+# BCCC-CIC-CSE-IDS2018
+# .venv/
+# .ipynb_checkpoints/
+# service.ipynb
 
-.DS_Store
-Thumbs.db
+# .DS_Store
+# Thumbs.db
 
-300_datasets/
-400ATTACKDATA/
-400datasets/
-500-datasets/
-ATTACKDATA/
-CLASSICAL_PH/
-KERNELdatasets/
-mergedDatasets/
-NOTES/RESULTS/IMAGES/
-Notes-&-Collected-Results/
-pictures/
-quantum_kernel_testing/
-Quantum_Topological_Data_Analysis-NEW/
-quantumPH/
-scrap/
-SORTEDDATA/
-sortedDatasets/
-test_env/
-TEST-DATA-16FEAT/
-TEST-DATA-TEMP/
-classicBenchmark.ipynb
-fidelity_circuit.png
-jobcircuit.png
-KERNEL-AER.ipynb
-KERNEL-m3.ipynb
-KERNEL.ipynb
-KERNELATTACK.ipynb
-KERNELSCRIPT.ipynb
-optimQKern.ipynb
-QKERNEL.ipynb
-updated-quask/
-QKERNEL-hardware.ipynb
-KERNELSCRIPT.py
-
-
-
+*
+!classicalBenchmark.ipynb
+!NIDS-QKERNEL.ipynb
+!PREPROCESSING.ipynb
+!updated_kernel.py
+!updated_qiskit_kernel.py
+!requirements.txt
+!TEST-DATA/
+!TEST-DATA/**
+!README.md
