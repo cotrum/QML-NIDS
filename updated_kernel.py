@@ -107,6 +107,8 @@ class Kernel(ABC):
                         kernel_matrix[i,j] = 1
                     else:
                         kernel_matrix[i,j] = self.kappa(X1[i], X2[j])
+                        qc = kernel_matrix[i,j] 
+                        # qc.draw('mpl')
                         kernel_matrix[j,i] = kernel_matrix[i,j]
             return kernel_matrix
         
@@ -121,8 +123,23 @@ class Kernel(ABC):
                         qc = self.kappa(X1[i], X2[j])
                         entries.append((i, j))
                         circuits.append(qc)
+                      
             
             if circuits:
+                # list instructions to find the index/name
+                circuit=circuits[0]
+                for i, (inst, qargs, cargs) in enumerate(circuit.data):
+                    print(i, inst.name)
+
+                # get the first instruction named "circuit-174"
+                idx, inst = next((i, inst) for i,(inst,_,_) in enumerate(circuit.data)
+                                if inst.name == "circuit-174")
+
+                # the subcircuit itself:
+                subcirc = inst.definition            # this is a QuantumCircuit
+                print(subcirc)                       # or subcirc.draw('mpl')
+
+                
                 pm = generate_preset_pass_manager(
                     backend=self.backend,
                     optimization_level=self.optimization_level,
